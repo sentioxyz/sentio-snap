@@ -1,0 +1,34 @@
+{
+  "version": "0.1.0",
+  "description": "Sentio snap helps you to preview your transaction before you send it to the network.",
+  "proposedName": "Sentio Tx Preview",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sentioxyz/sentio-snap"
+  },
+  "source": {
+    "shasum": "nW1/2r9/N2sDi0R2fm8wFoenu69wpC5fLbRrmztrWnc=",
+    "location": {
+      "npm": {
+        "filePath": "dist/bundle.js",
+        "iconPath": "images/icon.svg",
+        "packageName": "snap",
+        "registry": "https://registry.npmjs.org/"
+      }
+    }
+  },
+  "initialPermissions": {
+    "snap_dialog": {},
+    "endowment:rpc": {
+      "dapps": true,
+      "snaps": false
+    },
+    "endowment:transaction-insight": {
+      "allowTransactionOrigin": true
+    },
+    "endowment:network-access": {},
+    "snap_manageState": {},
+    "endowment:ethereum-provider": {}
+  },
+  "manifestVersion": "0.1"
+}
