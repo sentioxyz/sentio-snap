@@ -28,7 +28,14 @@
   "dependencies": {
     "@metamask/snaps-types": "^2.0.0",
     "@metamask/snaps-ui": "^2.0.0",
-    "buffer": "^6.0.3"
+    "@metamask/utils": "^8.1.0",
+    "@sentio/bigdecimal": "^9.1.1-patch.3",
+    "@sentio/chain": "^1.0.5",
+    "@sentio/debugger-common": "^1.16.25",
+    "buffer": "^6.0.3",
+    "lodash": "^4.17.21",
+    "validator": "^13.11.0",
+    "web3": "^4.1.2"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",
@@ -40,6 +47,7 @@
     "@metamask/eslint-config-typescript": "^10.0.0",
     "@metamask/snaps-cli": "^2.0.1",
     "@metamask/snaps-jest": "^1.0.0",
+    "@types/validator": "^13.11.2",
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",
     "eslint": "^8.21.0",

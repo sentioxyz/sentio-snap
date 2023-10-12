@@ -1,5 +1,11 @@
-import { OnRpcRequestHandler } from '@metamask/snaps-types';
-import { panel, text } from '@metamask/snaps-ui';
+import {
+  OnRpcRequestHandler,
+  OnTransactionHandler,
+} from '@metamask/snaps-types';
+import {NodeType, panel, text} from '@metamask/snaps-ui';
+import {hasProperty, isObject} from '@metamask/utils';
+import {simulate, resultPanel, errorPanel, computeBalanceChange} from './sentio';
+import {fillTokenLabels} from "./sentio/ui";
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -11,7 +17,7 @@ import { panel, text } from '@metamask/snaps-ui';
  * @returns The result of `snap_dialog`.
  * @throws If the request method is not valid for this snap.
  */
-export const onRpcRequest: OnRpcRequestHandler = ({ origin, request }) => {
+export const onRpcRequest: OnRpcRequestHandler = ({origin, request}) => {
   switch (request.method) {
     case 'hello':
       return snap.request({
@@ -29,5 +35,47 @@ export const onRpcRequest: OnRpcRequestHandler = ({ origin, request }) => {
       });
     default:
       throw new Error('Method not found.');
+  }
+};
+
+
+
+export const onTransaction: OnTransactionHandler = async ({
+                                                            transaction,
+                                                            transactionOrigin,
+                                                            chainId,
+                                                          }) => {
+  if (!isObject(transaction) || !hasProperty(transaction, 'to')) {
+    return {
+      content: {
+        value: 'Unknown transaction type',
+        type: NodeType.Text,
+      },
+    };
+  }
+
+  try {
+    const {traceResponse, simulationResponse} = await simulate(
+      transaction,
+      transactionOrigin || '',
+      chainId,
+    );
+
+    const simulation = simulationResponse.simulation!;
+    const balanceChange = computeBalanceChange(chainId, simulation, traceResponse);
+    await fillTokenLabels(chainId, balanceChange)
+    return {
+      content: {
+        children: [resultPanel(simulation, balanceChange)],
+        type: NodeType.Panel,
+      },
+    };
+  } catch (e) {
+    return {
+      content: {
+        children: [errorPanel(e.message)],
+        type: NodeType.Panel,
+      }
+    };
   }
 };

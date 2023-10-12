@@ -4,10 +4,10 @@
   "proposedName": "Sentio Tx Preview",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sentioxyz/sentio-snap"
+    "url": "https://github.com/MetaMask/template-snap-monorepo.git"
   },
   "source": {
-    "shasum": "nW1/2r9/N2sDi0R2fm8wFoenu69wpC5fLbRrmztrWnc=",
+    "shasum": "DvSYs6j7j6McpeQNRzI+VtpWLCp10AJBO/THZNnrx2g=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

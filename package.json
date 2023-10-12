@@ -1,5 +1,5 @@
 {
-  "name": "@metamask/template-snap-monorepo",
+  "name": "@sentio/sentio-snap",
   "version": "0.1.0",
   "private": true,
   "description": "",
@@ -17,13 +17,13 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "pnpm workspaces foreach --parallel --topological --verbose run build",
+    "build": "yarn workspaces foreach --parallel --topological --verbose run build",
     "install-chrome": "./scripts/install-chrome.sh",
     "lint": "yarn lint:eslint && yarn lint:misc --check",
     "lint:eslint": "eslint . --cache --ext js,ts",
     "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
     "lint:misc": "prettier '**/*.json' '**/*.md' '!**/CHANGELOG.md' '**/*.yml' --ignore-path .gitignore",
-    "start": "pnpm workspaces foreach --parallel --interlaced --verbose run start",
+    "start": "yarn workspaces foreach --parallel --interlaced --verbose run start",
     "test": "echo \"TODO\""
   },
   "devDependencies": {
