@@ -1,36 +1,31 @@
 export type Simulation = {
-  blockNumber: string,
-  createAt: string,
-  from: string,
-  gas: string,
-  gasPrice: string,
-  id: string,
-  input: string,
-  networkId: string,
-  to: string,
-  transactionIndex: string,
-  value: string,
+  blockNumber: string;
+  createAt: string;
+  from: string;
+  gas: string;
+  gasPrice: string;
+  id: string;
+  input: string;
+  networkId: string;
+  to: string;
+  transactionIndex: string;
+  value: string;
   result?: Simulation_Result;
-}
+  url?: string;
+};
 
-export interface Simulation_Result {
+export type Simulation_Result = {
   transaction: Transaction | undefined;
-  transactionReceipt:
-    | TransactionReceipt
-    | undefined;
+  transactionReceipt: TransactionReceipt | undefined;
   /** @deprecated */
-  trace:
-    | { [key: string]: any }
-    | undefined;
+  trace: { [key: string]: any } | undefined;
   /** @deprecated */
-  stateDiff:
-    | { [key: string]: any }
-    | undefined;
+  stateDiff: { [key: string]: any } | undefined;
   /** @deprecated */
   code: { [key: string]: any } | undefined;
-}
+};
 
-export interface Transaction {
+export type Transaction = {
   blockNumber: string;
   blockHash: string;
   transactionIndex: string;
@@ -44,37 +39,37 @@ export interface Transaction {
   nonce: string;
   gas: string;
   gasPrice: string;
-}
+};
 
-export interface TransactionReceipt {
+export type TransactionReceipt = {
   gasUsed: string;
   cumulativeGasUsed: string;
   effectiveGasPrice: string;
   status: string;
   error: string;
   revertReason: string;
-  logs: Array<any> | undefined;
-}
+  logs: any[] | undefined;
+};
 
 export type SimulationResponse = {
-  simulation?: Simulation,
-  code?: number,
-  message?: string,
-}
+  simulation?: Simulation;
+  code?: number;
+  message?: string;
+};
 
-export type BalanceChange ={
-  in: Balance
-  out: Balance
-}
+export type BalanceChange = {
+  in: Balance;
+  out: Balance;
+};
 
 export type Balance = {
-  [token: string]: Token
-}
+  [token: string]: Token;
+};
 
 export type Token = {
-  amount: bigint,
-  label?: string,
-  price?: number,
-  tokenDecimals?: number,
-  isNft?: boolean,
-}
+  amount: bigint;
+  label?: string;
+  price?: number;
+  tokenDecimals?: number;
+  isNft?: boolean;
+};

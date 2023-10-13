@@ -2,51 +2,47 @@ import {
   OnRpcRequestHandler,
   OnTransactionHandler,
 } from '@metamask/snaps-types';
-import {NodeType, panel, text} from '@metamask/snaps-ui';
-import {hasProperty, isObject} from '@metamask/utils';
-import {simulate, resultPanel, errorPanel, computeBalanceChange} from './sentio';
-import {fillTokenInfo} from "./sentio/ui";
+import { NodeType } from '@metamask/snaps-ui';
+import { hasProperty, isObject } from '@metamask/utils';
+import {
+  simulate,
+  resultPanel,
+  errorPanel,
+  computeBalanceChange,
+} from './sentio';
+import { fillTokenInfo } from './sentio/ui';
+import { getState, setState } from './sentio/store';
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
  *
  * @param args - The request handler args as object.
- * @param args.origin - The origin of the request, e.g., the website that
- * invoked the snap.
  * @param args.request - A validated JSON-RPC request object.
  * @returns The result of `snap_dialog`.
  * @throws If the request method is not valid for this snap.
  */
-export const onRpcRequest: OnRpcRequestHandler = ({origin, request}) => {
-/*
+export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   switch (request.method) {
-    case 'hello':
-      return snap.request({
-        method: 'snap_dialog',
-        params: {
-          type: 'confirmation',
-          content: panel([
-            text(`Hello, **${origin}**!`),
-            text('This custom confirmation is just for display purposes.'),
-            text(
-              'But you can edit the snap source code to make it do something, if you want to!',
-            ),
-          ]),
-        },
-      });
+    case 'set_project': {
+      const { project, apiKey } = request.params as any;
+      await setState({ project, apiKey });
+      return null;
+    }
+
+    case 'get_project': {
+      const state = await getState();
+      return state?.project;
+    }
     default:
       throw new Error('Method not found.');
   }
-*/
-  return Promise.resolve(null);
 };
 
-
 export const onTransaction: OnTransactionHandler = async ({
-                                                            transaction,
-                                                            // transactionOrigin,
-                                                            // chainId,
-                                                          }) => {
+  transaction,
+  // transactionOrigin,
+  // chainId,
+}) => {
   if (!isObject(transaction) || !hasProperty(transaction, 'to')) {
     return {
       content: {
@@ -57,11 +53,18 @@ export const onTransaction: OnTransactionHandler = async ({
   }
 
   try {
-    const {traceResponse, simulationResponse} = await simulate(transaction);
+    const { traceResponse, simulationResponse } = await simulate(transaction);
 
-    const simulation = simulationResponse.simulation!;
-    const balanceChange = computeBalanceChange(simulation.networkId, simulation.from, traceResponse);
-    await fillTokenInfo(simulation.networkId, balanceChange)
+    const { simulation } = simulationResponse;
+    if (!simulation) {
+      throw new Error('Simulation response is missing simulation object');
+    }
+    const balanceChange = computeBalanceChange(
+      simulation.networkId,
+      simulation.from,
+      traceResponse,
+    );
+    await fillTokenInfo(simulation.networkId, balanceChange);
     return {
       content: {
         children: [resultPanel(simulation, balanceChange)],
@@ -73,7 +76,7 @@ export const onTransaction: OnTransactionHandler = async ({
       content: {
         children: [errorPanel(e.message)],
         type: NodeType.Panel,
-      }
+      },
     };
   }
 };

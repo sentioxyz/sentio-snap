@@ -1,32 +1,37 @@
-import {SentioExternalCallTrace} from "@sentio/debugger-common";
-import pick from 'lodash/pick'
-import Web3 from 'web3'
-import {ChainId, SupportedChains} from '@sentio/chain'
-import BigDecimal from "@sentio/bigdecimal";
-import {hex2int} from "./simulation";
-export const BD = BigDecimal.clone({
-  EXPONENTIAL_AT: [-20, 20]
-})
+/* eslint-disable jsdoc/require-jsdoc */
+import { SentioExternalCallTrace } from '@sentio/debugger-common';
+import pick from 'lodash/pick';
+import Web3 from 'web3';
+import { ChainId, SupportedChains } from '@sentio/chain';
+import BigDecimal from '@sentio/bigdecimal';
+import { hex2int } from './simulation';
 
+export const BD = BigDecimal.clone({
+  EXPONENTIAL_AT: [-20, 20],
+});
 
 export const formatCurrency = (value: number, maxValidDigits = 2) => {
   // can't use Intl.NumberFormat because the limitation of https://docs.metamask.io/snaps/concepts/execution-environment/
-  const str = value.toFixed(maxValidDigits)
-  const [int, decimal] = str.split('.')
-  const intStr = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  return decimal ? `$${intStr}.${decimal}` : `${intStr}`
-}
+  const str = value.toFixed(maxValidDigits);
+  const [int, decimal] = str.split('.');
+  const intStr = int.replace(/\B(?=(\d{3})+(?!\d))/gu, ',');
+  return decimal ? `$${intStr}.${decimal}` : `${intStr}`;
+};
 
-export function getNumberWithDecimal(hex?: string | bigint, decimal?: number, asNumber?: boolean) {
+export function getNumberWithDecimal(
+  hex?: string | bigint,
+  decimal?: number,
+  asNumber?: boolean,
+) {
   if (hex === undefined || decimal === undefined) {
-    return null
+    return null;
   }
-  const bigInt = typeof hex === 'bigint' ? hex : BigInt(hex2int(hex) || 0)
-  const n = BD(bigInt.toString()).div(decimal > 0 ? BD(10).pow(decimal) : 1)
+  const bigInt = typeof hex === 'bigint' ? hex : BigInt(hex2int(hex) || 0);
+  const n = BD(bigInt.toString()).div(decimal > 0 ? BD(10).pow(decimal) : 1);
   if (asNumber) {
-    return n.toNumber()
+    return n.toNumber();
   }
-  return n.toString()
+  return n.toString();
 }
 
 const ABI = [
@@ -36,21 +41,21 @@ const ABI = [
       {
         indexed: true,
         name: 'from',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: true,
         name: 'to',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: false,
         name: 'value',
-        type: 'uint256' // TODO if
-      }
+        type: 'uint256', // TODO if
+      },
     ],
     name: 'Transfer',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -58,16 +63,16 @@ const ABI = [
       {
         indexed: true,
         name: 'src',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: false,
         name: 'wad',
-        type: 'uint256'
-      }
+        type: 'uint256',
+      },
     ],
     name: 'Withdrawal',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -75,149 +80,158 @@ const ABI = [
       {
         indexed: true,
         name: 'dst',
-        type: 'address'
+        type: 'address',
       },
       {
         indexed: false,
         name: 'wad',
-        type: 'uint256'
-      }
+        type: 'uint256',
+      },
     ],
     name: 'Deposit',
-    type: 'event'
-  }
-]
+    type: 'event',
+  },
+];
 
-const web3 = new Web3()
+const web3 = new Web3();
 
-const EVENT_MAP = new Map<string, number>()
+const EVENT_MAP = new Map<string, number>();
 
 for (const [idx, abiItem] of ABI.entries()) {
-  EVENT_MAP.set(web3.eth.abi.encodeEventSignature(abiItem), idx)
+  EVENT_MAP.set(web3.eth.abi.encodeEventSignature(abiItem), idx);
 }
 
-
 export function isZeroValue(data: string) {
-  return data === '0x0' || data === '0x' || data === '0'
+  return data === '0x0' || data === '0x' || data === '0';
 }
 
 export function filterFundTraces(rootTrace: SentioExternalCallTrace) {
-  const res: any[] = []
+  const res: any[] = [];
   const walk = (entry: any) => {
     // TODO add typing
-    const { traces, value, error } = entry
-    const calls: any[] = []
-    const logs: any[] = []
+    const { traces, value, error } = entry;
+    const calls: any[] = [];
+    const logs: any[] = [];
 
     if (error) {
-      return
+      return;
     }
+
     if (value && !isZeroValue(value)) {
-      res.push(pick(entry, ['from', 'to', 'value', 'startIndex']))
+      res.push(pick(entry, ['from', 'to', 'value', 'startIndex']));
     }
 
     if (!traces) {
-      return
+      return;
     }
 
     for (const trace of traces) {
       if (trace.type.startsWith('LOG')) {
-        logs.push(trace as any)
+        logs.push(trace as any);
       } else {
-        calls.push(trace as any)
+        calls.push(trace as any);
       }
     }
 
     logs.forEach((rawLog) => {
-      const log = decodeLog(rawLog)
+      const log = decodeLog(rawLog);
       if (!log) {
-        return
+        return;
       }
+
       try {
         if (log.name === 'Transfer') {
-          const [from, to, value] = log.events
+          const [from, to, value] = log.events;
           if (isNumeric(value) && value !== '0') {
-            res.push(log)
+            res.push(log);
           }
         } else if (log.name === 'Withdrawal') {
-          const [from, value] = log.events
+          const [from, value] = log.events;
           if (isNumeric(value) && value !== '0') {
-            res.push(log)
+            res.push(log);
           }
         } else if (log.name === 'Deposit') {
-          const [dst, wad] = log.events
+          const [dst, wad] = log.events;
           // if (dst?.type === 'address' && wad?.type?.startsWith('uint') && wad && wad?.value !== '0') {
           if (isNumeric(wad) && wad !== '0') {
-            res.push(log)
+            res.push(log);
           }
           // }
         }
       } catch {
         // ignore
       }
-    })
-    calls.forEach(walk)
-  }
+    });
+    calls.forEach(walk);
+  };
+
   if (rootTrace) {
-    walk(rootTrace)
+    walk(rootTrace);
   }
-  return res
+  return res;
 }
 
 export function decodeLog(log: any) {
-  const idx = EVENT_MAP.get(log?.topics?.[0])
+  const idx = EVENT_MAP.get(log?.topics?.[0]);
   if (idx === undefined) {
-    return undefined
+    return undefined;
   }
-  const abiItem = ABI[idx]
+  const abiItem = ABI[idx];
   if (!abiItem.inputs) {
-    return undefined
+    return undefined;
   }
 
   // if (idx > 0 && !isWrappedNativeToken(log.address)) {
   //   return undefined
   // }
   try {
-    const event = web3.eth.abi.decodeLog(abiItem.inputs, log.data, log.topics.slice(1))
-    const arr = []
+    const event = web3.eth.abi.decodeLog(
+      abiItem.inputs,
+      log.data,
+      log.topics.slice(1),
+    );
+    const arr = [];
     for (let i = 0; i < abiItem.inputs.length; i++) {
       // @ts-ignore actually has index
-      arr.push(event[i])
+      arr.push(event[i]);
     }
     return {
       ...log,
       name: abiItem.name,
-      events: arr
-    }
+      events: arr,
+    };
   } catch (e) {
     // ignore
-    console.error(e)
+    console.error(e);
   }
 
-  return undefined
+  return undefined;
 }
 
-
-const defaultChain = SupportedChains[ChainId.ETHEREUM]
+const defaultChain = SupportedChains[ChainId.ETHEREUM];
 
 export const getNativeToken = (chainId?: string) => {
   if (!chainId) {
-    return defaultChain
+    return defaultChain;
   }
-  return SupportedChains[chainId] || defaultChain
-}
+  return SupportedChains[chainId] || defaultChain;
+};
 
 export function isNumeric(value: any) {
   if (value === undefined || value === null) {
-    return false
+    return false;
   }
+
   if (typeof value === 'number') {
-    return true
+    return true;
   }
-  if (typeof value == 'bigint') {
-    return true
+
+  if (typeof value === 'bigint') {
+    return true;
   }
+
   if (typeof value === 'string') {
-    return !isNaN(parseFloat(value)) && isFinite(Number(value))
+    return !isNaN(parseFloat(value)) && isFinite(Number(value));
   }
+  return false;
 }
