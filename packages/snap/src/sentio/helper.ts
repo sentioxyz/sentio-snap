@@ -3,41 +3,25 @@ import pick from 'lodash/pick'
 import Web3 from 'web3'
 import {ChainId, SupportedChains} from '@sentio/chain'
 import BigDecimal from "@sentio/bigdecimal";
+import {hex2int} from "./simulation";
 export const BD = BigDecimal.clone({
   EXPONENTIAL_AT: [-20, 20]
 })
 
-const nf = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  maximumFractionDigits: 18
-})
-
-const nf2 = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  maximumFractionDigits: 2
-})
 
 export const formatCurrency = (value: number, maxValidDigits = 2) => {
-  if (value < 0.01) {
-    const res = nf.format(value)
-    const [integer, decimal] = res.split('.')
-    const firstValidDigitIndex = decimal?.split('').findIndex((digit) => digit !== '0')
-    if (firstValidDigitIndex === -1) {
-      return res
-    } else {
-      const validDecimal = decimal?.substring(0, firstValidDigitIndex + maxValidDigits)
-      return `${integer}.${validDecimal}`
-    }
-  }
-  return nf2.format(value)
+  // can't use Intl.NumberFormat because the limitation of https://docs.metamask.io/snaps/concepts/execution-environment/
+  const str = value.toFixed(maxValidDigits)
+  const [int, decimal] = str.split('.')
+  const intStr = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return decimal ? `${intStr}.${decimal}` : intStr
 }
 
-export function getNumberWithDecimal(bigInt?: bigint, decimal?: number, asNumber?: boolean) {
-  if (bigInt === undefined || decimal === undefined) {
+export function getNumberWithDecimal(hex?: string | bigint, decimal?: number, asNumber?: boolean) {
+  if (hex === undefined || decimal === undefined) {
     return null
   }
+  const bigInt = typeof hex === 'bigint' ? hex : BigInt(hex2int(hex) || 0)
   const n = BD(bigInt.toString()).div(decimal > 0 ? BD(10).pow(decimal) : 1)
   if (asNumber) {
     return n.toNumber()

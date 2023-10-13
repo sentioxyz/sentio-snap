@@ -5,7 +5,7 @@ import {
 import {NodeType, panel, text} from '@metamask/snaps-ui';
 import {hasProperty, isObject} from '@metamask/utils';
 import {simulate, resultPanel, errorPanel, computeBalanceChange} from './sentio';
-import {fillTokenLabels} from "./sentio/ui";
+import {fillTokenInfo} from "./sentio/ui";
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -39,11 +39,10 @@ export const onRpcRequest: OnRpcRequestHandler = ({origin, request}) => {
 };
 
 
-
 export const onTransaction: OnTransactionHandler = async ({
                                                             transaction,
-                                                            transactionOrigin,
-                                                            chainId,
+                                                            // transactionOrigin,
+                                                            // chainId,
                                                           }) => {
   if (!isObject(transaction) || !hasProperty(transaction, 'to')) {
     return {
@@ -55,15 +54,11 @@ export const onTransaction: OnTransactionHandler = async ({
   }
 
   try {
-    const {traceResponse, simulationResponse} = await simulate(
-      transaction,
-      transactionOrigin || '',
-      chainId,
-    );
+    const {traceResponse, simulationResponse} = await simulate(transaction);
 
     const simulation = simulationResponse.simulation!;
     const balanceChange = computeBalanceChange(simulation.networkId, simulation.from, traceResponse);
-    await fillTokenLabels(simulation.networkId, balanceChange)
+    await fillTokenInfo(simulation.networkId, balanceChange)
     return {
       content: {
         children: [resultPanel(simulation, balanceChange)],

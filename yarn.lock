@@ -6869,13 +6869,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/validator@npm:^13.11.2":
-  version: 13.11.2
-  resolution: "@types/validator@npm:13.11.2"
-  checksum: 7fceb65a9729c2d0fca7f21acd13eaf93bd5e1a0367817dc1afd160f3053cd6fefbb2ba368134c1d864b9f3bfcc99b588f069c9db400481b96265b827e53562e
-  languageName: node
-  linkType: hard
-
 "@types/which@npm:^2.0.1":
   version: 2.0.2
   resolution: "@types/which@npm:2.0.2"
@@ -21262,7 +21255,6 @@ __metadata:
     "@sentio/bigdecimal": ^9.1.1-patch.3
     "@sentio/chain": ^1.0.5
     "@sentio/debugger-common": ^1.16.25
-    "@types/validator": ^13.11.2
     "@typescript-eslint/eslint-plugin": ^5.33.0
     "@typescript-eslint/parser": ^5.33.0
     buffer: ^6.0.3
@@ -21281,7 +21273,6 @@ __metadata:
     through2: ^4.0.2
     ts-jest: ^29.1.0
     typescript: ^4.7.4
-    validator: ^13.11.0
     web3: ^4.1.2
   languageName: unknown
   linkType: soft
@@ -23242,13 +23233,6 @@ __metadata:
   dependencies:
     builtins: ^5.0.0
   checksum: 5342a994986199b3c28e53a8452a14b2bb5085727691ea7aa0d284a6606b127c371e0925ae99b3f1ef7cc7d2c9de75f52eb61a3d1cc45e39bca1e3a9444cbb4e
-  languageName: node
-  linkType: hard
-
-"validator@npm:^13.11.0":
-  version: 13.11.0
-  resolution: "validator@npm:13.11.0"
-  checksum: d1e0c27022681420756da25bc03eb08d5f0c66fb008f8ff02ebc95812b77c6be6e03d3bd05cf80ca702e23eeb73dadd66b4b3683173ea2a0bc7cc72820bee131
   languageName: node
   linkType: hard
 

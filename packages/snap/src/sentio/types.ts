@@ -10,6 +10,50 @@ export type Simulation = {
   to: string,
   transactionIndex: string,
   value: string,
+  result?: Simulation_Result;
+}
+
+export interface Simulation_Result {
+  transaction: Transaction | undefined;
+  transactionReceipt:
+    | TransactionReceipt
+    | undefined;
+  /** @deprecated */
+  trace:
+    | { [key: string]: any }
+    | undefined;
+  /** @deprecated */
+  stateDiff:
+    | { [key: string]: any }
+    | undefined;
+  /** @deprecated */
+  code: { [key: string]: any } | undefined;
+}
+
+export interface Transaction {
+  blockNumber: string;
+  blockHash: string;
+  transactionIndex: string;
+  hash: string;
+  chainId: string;
+  type: string;
+  from: string;
+  to: string;
+  input: string;
+  value: string;
+  nonce: string;
+  gas: string;
+  gasPrice: string;
+}
+
+export interface TransactionReceipt {
+  gasUsed: string;
+  cumulativeGasUsed: string;
+  effectiveGasPrice: string;
+  status: string;
+  error: string;
+  revertReason: string;
+  logs: Array<any> | undefined;
 }
 
 export type SimulationResponse = {

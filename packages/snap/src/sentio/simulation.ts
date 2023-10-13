@@ -12,14 +12,10 @@ export const hex2int = (hex: string | Json): number | null => {
  * This function simulates something.
  *
  * @param transaction - The transaction object.
- * @param transactionOrigin - The transaction origin.
- * @param chainId - The chain ID.
- * @returns A Promise that resolves to a Panel.
+ * @returns A Promise
  */
 export async function simulate(
   transaction: { [key: string]: Json },
-  transactionOrigin: string,
-  chainId: string,
 ) {
   /**
    * Get the chain ID from the Ethereum provider.
@@ -31,9 +27,6 @@ export async function simulate(
     throw new Error('Invalid network ID');
   }
 
-  /**
-   * Create a simulation.
-   */
   const simulationResponse = await createSimulation(networkId, transaction);
   if (simulationResponse.code != null ) {
     throw new Error(simulationResponse.message);
@@ -41,10 +34,13 @@ export async function simulate(
   }
   const traceResponse = await getTraces(simulationResponse.simulation!.id, networkId);
 
-
   return { traceResponse, simulationResponse };
 }
 
+async function getBlockNumber(networkId: number) {
+  const url = baseUrl + '/api/v1/solidity/block_number' + `?networkId=${networkId}`;
+  return await fetch(url).then((response) => response.json());
+}
 
 /**
  * Creates a simulation.
@@ -60,10 +56,12 @@ async function createSimulation(
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
 
+  const blockNumber = await getBlockNumber(networkId);
+
   const raw = JSON.stringify({
     simulation: {
       networkId: `${networkId}`,
-      blockNumber: 'latest',
+      blockNumber: blockNumber?.blockNumber,
       transactionIndex: '0',
       from: transaction.from,
       to: transaction.to,
@@ -71,14 +69,6 @@ async function createSimulation(
       gas: transaction.gas,
       gasPrice: transaction.maxFeePerGas,
       input: transaction.data,
-      // stateOverrides: {
-      //   '0x0811fd1808e14f0b93f0514313965a5f142c5539': {
-      //     balance: '0x1111111111111111',
-      //   },
-      // },
-      // blockOverride: {
-      //   baseFee: '0x0',
-      // },
     },
   });
 
