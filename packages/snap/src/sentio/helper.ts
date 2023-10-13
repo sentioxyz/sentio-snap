@@ -1,12 +1,39 @@
 import {SentioExternalCallTrace} from "@sentio/debugger-common";
 import pick from 'lodash/pick'
 import Web3 from 'web3'
-import isNumeric from 'validator/lib/isNumeric'
 import {ChainId, SupportedChains} from '@sentio/chain'
 import BigDecimal from "@sentio/bigdecimal";
 export const BD = BigDecimal.clone({
   EXPONENTIAL_AT: [-20, 20]
 })
+
+const nf = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 18
+})
+
+const nf2 = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 2
+})
+
+export const formatCurrency = (value: number, maxValidDigits = 2) => {
+  if (value < 0.01) {
+    const res = nf.format(value)
+    const [integer, decimal] = res.split('.')
+    const firstValidDigitIndex = decimal?.split('').findIndex((digit) => digit !== '0')
+    if (firstValidDigitIndex === -1) {
+      return res
+    } else {
+      const validDecimal = decimal?.substring(0, firstValidDigitIndex + maxValidDigits)
+      return `${integer}.${validDecimal}`
+    }
+  }
+  return nf2.format(value)
+}
+
 export function getNumberWithDecimal(bigInt?: bigint, decimal?: number, asNumber?: boolean) {
   if (bigInt === undefined || decimal === undefined) {
     return null
@@ -85,12 +112,6 @@ for (const [idx, abiItem] of ABI.entries()) {
   EVENT_MAP.set(web3.eth.abi.encodeEventSignature(abiItem), idx)
 }
 
-const WRAPPED_TOKENS = new Set(Object.values(SupportedChains).map((c) => c.wrappedNativeTokenAddress.toLowerCase()))
-
-// TODO also consider chain id in arg
-function isWrappedNativeToken(address: string) {
-  return WRAPPED_TOKENS.has(address.toLowerCase())
-}
 
 export function isZeroValue(data: string) {
   return data === '0x0' || data === '0x' || data === '0'
@@ -169,9 +190,9 @@ export function decodeLog(log: any) {
     return undefined
   }
 
-  if (idx > 0 && !isWrappedNativeToken(log.address)) {
-    return undefined
-  }
+  // if (idx > 0 && !isWrappedNativeToken(log.address)) {
+  //   return undefined
+  // }
   try {
     const event = web3.eth.abi.decodeLog(abiItem.inputs, log.data, log.topics.slice(1))
     const arr = []
@@ -200,4 +221,19 @@ export const getNativeToken = (chainId?: string) => {
     return defaultChain
   }
   return SupportedChains[chainId] || defaultChain
+}
+
+export function isNumeric(value: any) {
+  if (value === undefined || value === null) {
+    return false
+  }
+  if (typeof value === 'number') {
+    return true
+  }
+  if (typeof value == 'bigint') {
+    return true
+  }
+  if (typeof value === 'string') {
+    return !isNaN(parseFloat(value)) && isFinite(Number(value))
+  }
 }

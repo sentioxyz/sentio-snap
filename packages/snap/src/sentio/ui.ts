@@ -1,10 +1,12 @@
 import {
-  Component, divider, panel, Panel, text, heading,
+  Component, divider, panel, Panel, text, heading, copyable,
 } from "@metamask/snaps-ui";
-import {Balance, BalanceChange, Simulation, Token} from "./types";
-import {getNativeToken, getNumberWithDecimal} from "./helper";
+import {BalanceChange, Simulation, Token} from "./types";
+import {formatCurrency, getNativeToken, getNumberWithDecimal} from "./helper";
 import {ERC20Token, getTag} from "./tag";
 import {getPrice} from "./price";
+import {baseUrl} from "./constants";
+import {multiply} from "lodash";
 
 
 /**
@@ -25,7 +27,7 @@ export function resultPanel(simulation: Simulation, balanceChange: BalanceChange
   const panelOutputs = [
     ...assertChanges(balanceChange),
     divider(),
-
+    ...sentioUrl(simulation),
   ];
 
   return panel(panelOutputs);
@@ -41,17 +43,27 @@ function assertChanges(balanceChange: BalanceChange): Component[] {
   const assetsInOutputs: Component[] = [text('💹 **Assets In**')];
   const assetsOutOutputs: Component[] = [text('〽️️ **Assets Out**')];
 
-  Object.entries(balanceChange.in).forEach(([tokenAddress, token]) => {
+  for (const [tokenAddress, token] of Object.entries(balanceChange.in)) {
     const symbolName: string = token.label || tokenAddress;
     assetsInOutputs.push(text(`**${symbolName}**`));
-    assetsInOutputs.push(text(`+ ${formatAmount(token)} (≈ ${formatUsdValue(token)})`));
-  })
+    let value = `Value: + ${formatAmount(token)}`;
+    const usdValue = formatUsdValue(token);
+    if (usdValue) {
+      value += ` (≈ ${usdValue})`
+    }
+    assetsOutOutputs.push(text(value));
+  }
 
-  Object.entries(balanceChange.out).forEach(([tokenAddress, token]) => {
+  for (const [tokenAddress, token] of Object.entries(balanceChange.out)) {
     const symbolName: string = token.label || tokenAddress;
-    assetsInOutputs.push(text(`**${symbolName}**`));
-    assetsInOutputs.push(text(`- ${formatAmount(token)} (≈ ${formatUsdValue(token)})`));
-  })
+    assetsOutOutputs.push(text(`**${symbolName}**`));
+    let value = `Value: - ${formatAmount(token)}`;
+    const usdValue = formatUsdValue(token);
+    if (usdValue) {
+      value += ` (≈ ${usdValue})`
+    }
+    assetsOutOutputs.push(text(value));
+  }
 
   if (assetsInOutputs.length > 1 && assetsOutOutputs.length > 1) {
     assetsOutOutputs.push(divider());
@@ -64,17 +76,31 @@ function assertChanges(balanceChange: BalanceChange): Component[] {
   return panelOutputs;
 }
 
+export function sentioUrl(simulation: Simulation): Component[] {
+  const simulationUrl = baseUrl + `/sim/${simulation.networkId}/${simulation.id}`;
+
+  return [
+    heading('Sentio Simulation'),
+    text('See full simulation details in Sentio.'),
+    copyable(`${simulationUrl}`),
+  ];
+}
+
 const formatAmount = (token: Token) => {
   return getNumberWithDecimal(token.amount, token.tokenDecimals || 18) as string
 }
 
 function formatUsdValue(token: Token) {
-  return "todo"
+  if (token.price) {
+    const amountEther = getNumberWithDecimal(token.amount, token.tokenDecimals || 18, true) as number
+    const value = multiply(Math.abs(amountEther), token.price)
+    return formatCurrency(value)
+  }
 }
 
 async function getTokenInfo(chainId: string, address: string) {
   const nativeToken = getNativeToken(chainId)
-  let info: any = {}
+  let info: any
   if (address === nativeToken.tokenAddress) {
     info = {
       symbol: nativeToken.tokenSymbol,
@@ -100,7 +126,7 @@ export async function fillTokenLabels(chainId: string, balanceChange: BalanceCha
   const tokenInfoMap: Record<string, any> = {}
 
   for (const balance of [balanceChange.in, balanceChange.out]) {
-    for (const [address] of Object.keys(balance)) {
+    for (const address of Object.keys(balance)) {
       const info = tokenInfoMap[address] || await getTokenInfo(chainId, address)
       const token = balance[address]
       token.label = info.symbol

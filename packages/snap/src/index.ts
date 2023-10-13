@@ -62,8 +62,8 @@ export const onTransaction: OnTransactionHandler = async ({
     );
 
     const simulation = simulationResponse.simulation!;
-    const balanceChange = computeBalanceChange(chainId, simulation, traceResponse);
-    await fillTokenLabels(chainId, balanceChange)
+    const balanceChange = computeBalanceChange(simulation.networkId, simulation.from, traceResponse);
+    await fillTokenLabels(simulation.networkId, balanceChange)
     return {
       content: {
         children: [resultPanel(simulation, balanceChange)],

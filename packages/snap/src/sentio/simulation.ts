@@ -95,6 +95,6 @@ async function createSimulation(
 }
 
 async function getTraces(simulationId: string, networkId: number): Promise<SentioExternalCallTrace> {
-  const url = baseUrl + '/api/v1/solidity/traces' + `?networkId=${networkId}&txId.simulationId=${simulationId}`;
+  const url = baseUrl + '/api/v1/solidity/call_trace' + `?networkId=${networkId}&txId.simulationId=${simulationId}`;
   return await fetch(url).then((response) => response.json());
 }

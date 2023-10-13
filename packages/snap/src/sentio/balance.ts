@@ -1,13 +1,13 @@
-import {BalanceChange, Simulation} from "./types";
+import {BalanceChange} from "./types";
 import {SentioExternalCallTrace} from "@sentio/debugger-common";
 import {filterFundTraces, getNativeToken, isZeroValue} from "./helper";
 
-export function computeBalanceChange(chainId:string, simulation: Simulation, traces: SentioExternalCallTrace) {
+export function computeBalanceChange(chainId:string, sender: string, traces: SentioExternalCallTrace) {
   const fundFlows = filterFundTraces(traces)
 
   const balanceChange: BalanceChange = { in: {}, out: {}}
   const addBalance = (address: string, token: string, value: string, negative = false) => {
-    if (address!= simulation.from) {
+    if (address.toLowerCase()!= sender.toLowerCase()) {
       return // ignore other addresses
     }
     if (!value || isZeroValue(value)) {
@@ -22,7 +22,7 @@ export function computeBalanceChange(chainId:string, simulation: Simulation, tra
   }
 
   const nativeToken = getNativeToken(chainId)
-  fundFlows.forEach((item) => {
+  for (const item of fundFlows) {
     if (item.address) {
       const {events: inputs, address, name} = item
       if (name === 'Transfer') {
@@ -43,7 +43,7 @@ export function computeBalanceChange(chainId:string, simulation: Simulation, tra
       addBalance(from, nativeToken.tokenAddress, value, true)
       addBalance(to, nativeToken.tokenAddress, value)
     }
-  })
+  }
 
   return balanceChange
 }
