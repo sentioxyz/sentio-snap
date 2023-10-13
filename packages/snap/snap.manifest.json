@@ -4,15 +4,15 @@
   "proposedName": "Sentio Tx Preview",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaMask/template-snap-monorepo.git"
+    "url": "https://github.com/sentioxyz/sentio-snap"
   },
   "source": {
-    "shasum": "AitE2oee9HixnZUrNn8+A06LnAa5TuI70qZmfq2iJDc=",
+    "shasum": "o3mzEZh9cdQuT93QdmGcQSTuSje2fABJgST+3ynRP4I=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
         "iconPath": "images/icon.svg",
-        "packageName": "snap",
+        "packageName": "@sentio/snap",
         "registry": "https://registry.npmjs.org/"
       }
     }
