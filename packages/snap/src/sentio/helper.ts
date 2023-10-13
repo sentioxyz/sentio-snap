@@ -14,7 +14,7 @@ export const formatCurrency = (value: number, maxValidDigits = 2) => {
   const str = value.toFixed(maxValidDigits)
   const [int, decimal] = str.split('.')
   const intStr = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  return decimal ? `${intStr}.${decimal}` : intStr
+  return decimal ? `$${intStr}.${decimal}` : `${intStr}`
 }
 
 export function getNumberWithDecimal(hex?: string | bigint, decimal?: number, asNumber?: boolean) {

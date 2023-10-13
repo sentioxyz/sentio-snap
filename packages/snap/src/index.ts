@@ -18,6 +18,7 @@ import {fillTokenInfo} from "./sentio/ui";
  * @throws If the request method is not valid for this snap.
  */
 export const onRpcRequest: OnRpcRequestHandler = ({origin, request}) => {
+/*
   switch (request.method) {
     case 'hello':
       return snap.request({
@@ -36,6 +37,8 @@ export const onRpcRequest: OnRpcRequestHandler = ({origin, request}) => {
     default:
       throw new Error('Method not found.');
   }
+*/
+  return Promise.resolve(null);
 };
 
 

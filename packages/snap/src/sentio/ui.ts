@@ -74,7 +74,7 @@ function assertChanges(balanceChange: BalanceChange): Component[] {
 
   const assetsOutOutputs: Component[] = [text('〽️️ **Assets Out**')];
   for (const [tokenAddress, token] of Object.entries(balanceChange.out)) {
-    assetsInOutputs.push(...tokenUI(token, tokenAddress, '-'));
+    assetsOutOutputs.push(...tokenUI(token, tokenAddress, '-'));
   }
 
   if (assetsInOutputs.length > 1 && assetsOutOutputs.length > 1) {
@@ -95,7 +95,7 @@ export function sentioUrl(simulation: Simulation): Component[] {
     heading('Sentio Simulation'),
     text('See full simulation details in Sentio.'),
     copyable(`${simulationUrl}`),
-    text('_Please note that this link will expire in 1 hour._')
+    text('_Please note this link will expire in 1 hour._')
   ];
 }
 
@@ -130,7 +130,7 @@ async function getTokenInfo(chainId: string, address: string) {
       isNft: !!tag.token?.erc721,
     }
   }
-  info.price = (await getPrice(chainId, address, new Date().toString()))?.price
+  info.price = await getPrice(chainId, address, new Date().toISOString())
 
   return info
 }
