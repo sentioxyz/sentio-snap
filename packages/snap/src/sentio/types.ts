@@ -11,7 +11,7 @@ export type Simulation = {
   transactionIndex: string;
   value: string;
   result?: Simulation_Result;
-  url?: string;
+  project?: string;
 };
 
 export type Simulation_Result = {

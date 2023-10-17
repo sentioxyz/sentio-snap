@@ -1,8 +1,10 @@
-import { Json } from '@metamask/utils';
-import { SentioExternalCallTrace } from '@sentio/debugger-common';
-import { SimulationResponse } from './types';
-import { baseUrl } from './constants';
-import { getState } from './store';
+import {Json} from '@metamask/utils';
+import {SentioExternalCallTrace, } from '@sentio/debugger-common';
+import {Simulation, SimulationResponse} from './types';
+import {baseUrl} from './constants';
+import {getState} from './store';
+import {api} from "./api";
+import {SupportedChains, getChainName} from '@sentio/chain'
 
 /**
  * Gets the block number for the given network ID.
@@ -30,18 +32,20 @@ export async function simulate(transaction: { [key: string]: Json }) {
   if (networkId === null) {
     throw new Error('Invalid network ID');
   }
+  if (!SupportedChains[networkId]) {
+    const chain = getChainName(networkId);
+    throw new Error(`Chain ${chain} (${networkId}) is not supported by Sentio.xyz yet.`);
+  }
 
   const simulationResponse = await createSimulation(networkId, transaction);
-  if (simulationResponse.code !== null) {
-    throw new Error(simulationResponse.message);
-    // return errorPanel(simulationResponse?.message);
-  }
-  const traceResponse = await getTraces(
-    simulationResponse.simulation!.id,
-    networkId,
-  );
 
-  return { traceResponse, simulationResponse };
+  if (simulationResponse.simulation ) {
+    const traceResponse = await getTraces(simulationResponse.simulation);
+
+    return { traceResponse, simulationResponse };
+  } else {
+    throw new Error(simulationResponse.message);
+  }
 }
 
 /**
@@ -54,7 +58,7 @@ async function getBlockNumber(
   networkId: number,
 ): Promise<{ blockNumber: number }> {
   const url = `${baseUrl}/api/v1/solidity/block_number?networkId=${networkId}`;
-  return await fetch(url).then((response) => response.json());
+  return await api(url, 'GET');
 }
 
 /**
@@ -68,11 +72,7 @@ async function createSimulation(
   networkId: number,
   transaction: { [key: string]: Json },
 ): Promise<SimulationResponse> {
-  const myHeaders = new Headers();
-  myHeaders.append('Content-Type', 'application/json');
-
   const blockNumber = await getBlockNumber(networkId);
-
   const request: any = {
     simulation: {
       networkId: `${networkId}`,
@@ -94,29 +94,11 @@ async function createSimulation(
     request.projectSlug = slug;
   }
 
-  const raw = JSON.stringify(request);
-  if (state?.apiKey) {
-    myHeaders.append('api-key', state.apiKey as string);
-  }
-
-  const requestOptions = {
-    method: 'POST',
-    headers: myHeaders,
-    body: raw,
-  };
-
-  const simulationResponse = await fetch(
-    `${baseUrl}/api/v1/solidity/simulate`,
-    requestOptions,
-  ).then((res) => res.json());
+  const simulationResponse = await api(`${baseUrl}/api/v1/solidity/simulate`, 'POST', request) as SimulationResponse;
 
   const sim = simulationResponse.simulation;
-  if (sim) {
-    if (state.project) {
-      sim.url = `${baseUrl}/${state.project}/simulator/${sim.networkId}/${sim.id}`;
-    } else {
-      sim.url = `${baseUrl}/sim/${sim.networkId}/${sim.id}`;
-    }
+  if (sim && state?.project) {
+    sim.project = state.project;
   }
   return simulationResponse;
 }
@@ -124,14 +106,15 @@ async function createSimulation(
 /**
  * Gets the traces for the given simulation ID and network ID.
  *
- * @param simulationId - The simulation ID.
- * @param networkId - The network ID.
  * @returns A Promise that resolves to a JSON object.
+ * @param simulation
  */
-async function getTraces(
-  simulationId: string,
-  networkId: number,
-): Promise<SentioExternalCallTrace> {
-  const url = `${baseUrl}/api/v1/solidity/call_trace?networkId=${networkId}&txId.simulationId=${simulationId}`;
-  return await fetch(url).then((response) => response.json());
+async function getTraces(simulation: Simulation): Promise<SentioExternalCallTrace> {
+  const { id, networkId, project } = simulation;
+  let url = `${baseUrl}/api/v1/solidity/call_trace?txId.simulationId=${id}&networkId=${networkId}`;
+  if (project) {
+    const [owner, slug] = project.split('/');
+    url+= `&projectOwner=${owner}&projectSlug=${slug}`;
+  }
+  return await api(url, 'GET');
 }

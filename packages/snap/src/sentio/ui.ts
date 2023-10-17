@@ -14,6 +14,7 @@ import { formatCurrency, getNativeToken, getNumberWithDecimal } from './helper';
 import { ERC20Token, getTag } from './tag';
 import { getPrice } from './price';
 import { hex2int } from './simulation';
+import {baseUrl} from "./constants";
 
 /**
  * Returns a panel with an error message.
@@ -104,13 +105,22 @@ function assertChanges(balanceChange: BalanceChange): Component[] {
   return panelOutputs;
 }
 
-export function sentioUrl(simulation: Simulation): Component[] {
-  return [
+export function sentioUrl(sim: Simulation): Component[] {
+  const ret : Component[] = [
     heading('Sentio Simulation'),
     text('See full simulation details in Sentio.'),
-    copyable(`${simulation.url}`),
-    text('_Please note this link will expire in 1 hour._'),
   ];
+
+  if (sim.project) {
+    const url = `${baseUrl}/${sim.project}/simulator/${sim.networkId}/${sim.id}`;
+    ret.push(copyable(url));
+  } else {
+    const url = `${baseUrl}/sim/${sim.networkId}/${sim.id}`;
+    ret.push(copyable(url));
+    ret.push(text('_Please note this link will expire in 1 hour._'))
+  }
+
+  return ret
 }
 
 function formatUsdValue(token: Token) {
