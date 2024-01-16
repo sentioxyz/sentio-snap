@@ -1,1 +1,1 @@
-export const baseUrl = 'https://test.sentio.xyz';
+export const baseUrl = 'https://app.sentio.xyz';

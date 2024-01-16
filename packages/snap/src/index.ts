@@ -34,6 +34,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       return state?.project;
     }
     default:
+      console.error("Method not found.2", request.method)
       throw new Error('Method not found.');
   }
 };
@@ -43,6 +44,8 @@ export const onTransaction: OnTransactionHandler = async ({
   // transactionOrigin,
   // chainId,
 }) => {
+  console.error('onTransaction');
+
   if (!isObject(transaction) || !hasProperty(transaction, 'to')) {
     return {
       content: {

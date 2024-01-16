@@ -1,5 +1,5 @@
 {
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Sentio snap helps you to preview your transaction before you send it to the network.",
   "proposedName": "Sentio Tx Preview",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "https://github.com/sentioxyz/sentio-snap"
   },
   "source": {
-    "shasum": "1wfWvoT+JlGBZMlyFUb3S0VJZmSSSTH18XyNNS5m+aQ=",
+    "shasum": "VYw1fNe0aQX6acx99bRGEkEp+Cx3aAcfBu6PDrFkC1E=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

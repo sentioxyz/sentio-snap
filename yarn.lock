@@ -5662,10 +5662,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentio/chain@npm:^1.0.5":
-  version: 1.0.5
-  resolution: "@sentio/chain@npm:1.0.5"
-  checksum: 5f23400292bcca7b22f7d94bd6430af9654833635d06d1095f1a73a3bd97e4b26f26f7b751bd5f6aa50947e0954f548c8405295783b3ebdc6b1ee4407a345c9f
+"@sentio/chain@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "@sentio/chain@npm:1.0.7"
+  checksum: b3ede48c05c0817a38e72017a8744e76a20b885740a081336fbc34a557b5914be52728ac5d5e99b33dbdd0de47cdf7b36a2b5225313acfc65dc4cfa63027dd68
   languageName: node
   linkType: hard
 
@@ -5721,7 +5721,7 @@ __metadata:
     "@metamask/snaps-ui": ^2.0.0
     "@metamask/utils": ^8.1.0
     "@sentio/bigdecimal": ^9.1.1-patch.3
-    "@sentio/chain": ^1.0.5
+    "@sentio/chain": ^1.0.7
     "@sentio/debugger-common": ^1.16.25
     "@typescript-eslint/eslint-plugin": ^5.33.0
     "@typescript-eslint/parser": ^5.33.0
